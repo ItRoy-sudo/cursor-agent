@@ -258,10 +258,11 @@ export default {
         });
 
         // Save session context for /cc command
-        if (result.sessionId && result.projectLabel) {
+        // 保存原始输入的 project 名称（可能是别名或绝对路径），而不是解析后的目录名
+        if (result.sessionId) {
           const channelId = ctx.channelId ?? "default";
           const senderId = ctx.senderId ?? "unknown";
-          saveSessionContext(channelId, senderId, result.projectLabel, result.sessionId);
+          saveSessionContext(channelId, senderId, parsed.project, result.sessionId);
         }
 
         const messages = formatRunResult(result);
@@ -306,7 +307,7 @@ export default {
         const projectPath = resolveProjectPath(parsed.project, projects);
         if (!projectPath) {
           return {
-            text: `Project not found: ${parsed.project}\n${projectListStr}`,
+            text: `❌ Project not found: ${parsed.project}\n${projectListStr}\n\n**提示：** 之前保存的会话使用的是 \`${context.project}\`，但当前配置中找不到该项目。\n可能是项目配置已更改，或者之前使用的是绝对路径但该路径已不可用。\n请重新使用 \`/cursor <project> <prompt>\` 开始新的会话。`,
           };
         }
 
@@ -324,9 +325,9 @@ export default {
           resumeSessionId: parsed.resumeSessionId,
         });
 
-        // Update session context with new sessionId
-        if (result.sessionId && result.projectLabel) {
-          saveSessionContext(channelId, senderId, result.projectLabel, result.sessionId);
+        // Update session context with new sessionId (使用原始 project 名称)
+        if (result.sessionId) {
+          saveSessionContext(channelId, senderId, parsed.project, result.sessionId);
         }
 
         const messages = formatRunResult(result);
