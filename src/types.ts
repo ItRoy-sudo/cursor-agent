@@ -144,6 +144,8 @@ export interface RunResult {
   usage?: ResultEvent["usage"];
   /** Full collected event stream */
   events: CollectedEvent[];
+  /** 由 projectPath（CLI cwd）解析的工作区展示名，供 footer 使用 */
+  projectLabel?: string;
 }
 
 /** /cursor command parse result */

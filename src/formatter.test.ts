@@ -51,6 +51,50 @@ describe("formatRunResult", () => {
     expect(combined).toContain("sess-abc-123");
   });
 
+  it("includes project label in footer when set", () => {
+    const messages = formatRunResult(makeResult({ projectLabel: "my-web-app" }));
+    const combined = messages.join("\n");
+    expect(combined).toContain("📁");
+    expect(combined).toContain("my-web-app");
+  });
+
+  it("omits project segment when projectLabel is empty", () => {
+    const messages = formatRunResult(makeResult({ projectLabel: "" }));
+    const combined = messages.join("\n");
+    expect(combined).not.toContain("📁");
+  });
+
+  it("shows resume command when both projectLabel and sessionId exist", () => {
+    const messages = formatRunResult(makeResult({
+      projectLabel: "flp-webportal",
+      sessionId: "86a7dffc-b80f-44b0-bab8-28833b2f4aad",
+    }));
+    const combined = messages.join("\n");
+    expect(combined).toContain("👉");
+    expect(combined).toContain("继续会话");
+    expect(combined).toContain("/cursor flp-webportal --resume 86a7dffc-b80f-44b0-bab8-28833b2f4aad");
+  });
+
+  it("omits resume command when projectLabel is missing", () => {
+    const messages = formatRunResult(makeResult({
+      projectLabel: "",
+      sessionId: "sess-123",
+    }));
+    const combined = messages.join("\n");
+    expect(combined).not.toContain("👉");
+    expect(combined).not.toContain("继续会话");
+  });
+
+  it("omits resume command when sessionId is missing", () => {
+    const messages = formatRunResult(makeResult({
+      projectLabel: "my-project",
+      sessionId: undefined,
+    }));
+    const combined = messages.join("\n");
+    expect(combined).not.toContain("👉");
+    expect(combined).not.toContain("继续会话");
+  });
+
   it("shows tool call summary", () => {
     const events: CollectedEvent[] = [
       { type: "tool_start", toolName: "read", toolArgs: "main.ts", timestamp: 1 },

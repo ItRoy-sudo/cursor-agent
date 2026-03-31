@@ -8,7 +8,7 @@ const MAX_MESSAGE_LENGTH = 3800;
  * 1. Status line (✅/❌)
  * 2. Tool call summary (if any)
  * 3. Agent conclusion (main content, most prominent)
- * 4. Stats + session ID (footer, metadata grouped at bottom)
+ * 4. Stats + workspace name + session ID (footer; 工作区名为 CLI cwd 目录 basename)
  */
 export function formatRunResult(result: RunResult): string[] {
   const sections: string[] = [];
@@ -93,10 +93,14 @@ function buildConclusion(events: CollectedEvent[]): string {
 }
 
 function buildFooter(result: RunResult): string {
-  const parts: string[] = [
+  const parts: string[] = [];
+  if (result.projectLabel?.trim()) {
+    parts.push(`📁 ${result.projectLabel.trim()}`);
+  }
+  parts.push(
     `⏱ ${(result.durationMs / 1000).toFixed(1)}s`,
     `🔧 ${result.toolCallCount} tool calls`,
-  ];
+  );
   if (result.usage) {
     parts.push(`📊 ${result.usage.inputTokens}in / ${result.usage.outputTokens}out tokens`);
   }
@@ -106,7 +110,15 @@ function buildFooter(result: RunResult): string {
   if (result.sessionId) {
     parts.push(`💬 ${result.sessionId}`);
   }
-  return `\n---\n_${parts.join(" | ")}_`;
+  let footer = `\n---\n_${parts.join(" | ")}_`;
+
+  // 添加快速续接命令（纯文本快捷指令）
+  if (result.projectLabel && result.sessionId) {
+    const resumeCmd = `/cursor ${result.projectLabel} --resume ${result.sessionId}`;
+    footer += `\n👉 **继续会话：** \`${resumeCmd}\``;
+  }
+
+  return footer;
 }
 
 /** Merge multiple text sections and split into messages by max length */

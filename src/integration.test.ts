@@ -7,7 +7,7 @@
  * - Tests real process management behavior (detached, signal handling)
  */
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { resolve, dirname } from "node:path";
+import { resolve, dirname, basename } from "node:path";
 import { fileURLToPath } from "node:url";
 import { runCursorAgent } from "./runner.js";
 import { formatRunResult, extractModifiedFiles } from "./formatter.js";
@@ -44,6 +44,7 @@ describe("integration: full execution flow", () => {
     });
 
     expect(result.success).toBe(true);
+    expect(result.projectLabel).toBe(basename(resolve(__dirname)));
     expect(result.sessionId).toBe("mock-session-001");
     expect(result.resultText).toBe("Analysis completed successfully");
     expect(result.toolCallCount).toBe(1);
@@ -199,6 +200,7 @@ describe("integration: tool + runner + formatter end-to-end", () => {
     });
 
     expect(result.content[0]!.text).toContain("✅");
+    expect(result.content[0]!.text).toContain("📁 src");
     expect(result.content[0]!.text).toContain("CRITICAL INSTRUCTION");
     expect(result.content[0]!.text).toContain("MUST NOT summarize");
     expect(result.details?.success).toBe(true);

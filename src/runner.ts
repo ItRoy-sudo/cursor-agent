@@ -1,5 +1,6 @@
 import { spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
+import { basename, resolve } from "node:path";
 import { createInterface } from "node:readline";
 import { parseStreamLine, extractToolName, extractToolArgs, extractToolResult } from "./parser.js";
 import * as registry from "./process-registry.js";
@@ -12,6 +13,18 @@ import type {
   SystemInitEvent,
   CollectedEvent,
 } from "./types.js";
+
+/**
+ * Footer 展示名：与 Cursor Agent 进程 cwd（projectPath）一致，取解析后路径的最后一级目录名。
+ */
+export function workspaceDisplayLabel(projectPath: string): string {
+  const normalized = resolve(projectPath);
+  const name = basename(normalized);
+  if (!name || name === "." || name === "..") {
+    return normalized;
+  }
+  return name;
+}
 
 /** Build CLI command and arguments (跨平台统一) */
 function buildCommand(opts: RunOptions): { cmd: string; args: string[]; shell: boolean } {
@@ -62,6 +75,8 @@ function buildCommand(opts: RunOptions): { cmd: string; args: string[]; shell: b
 
 /** Execute Cursor Agent CLI and collect the full event stream */
 export async function runCursorAgent(opts: RunOptions): Promise<RunResult> {
+  const projectLabel = workspaceDisplayLabel(opts.projectPath);
+
   if (registry.isFull()) {
     return {
       success: false,
@@ -70,6 +85,7 @@ export async function runCursorAgent(opts: RunOptions): Promise<RunResult> {
       toolCallCount: 0,
       error: "max concurrency reached",
       events: [],
+      projectLabel,
     };
   }
 
@@ -233,6 +249,7 @@ export async function runCursorAgent(opts: RunOptions): Promise<RunResult> {
         error,
         usage,
         events,
+        projectLabel,
       });
     };
 

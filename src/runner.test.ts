@@ -25,7 +25,7 @@ vi.mock("./process-registry.js", () => ({
   killWithGrace: vi.fn(),
 }));
 
-import { runCursorAgent } from "./runner.js";
+import { runCursorAgent, workspaceDisplayLabel } from "./runner.js";
 import * as registry from "./process-registry.js";
 
 function createMockChildProcess(): ChildProcess & { _stdout: PassThrough; simulateOutput: (lines: string[]) => void; simulateClose: (code: number) => void; simulateError: (msg: string) => void } {
@@ -103,6 +103,7 @@ describe("runCursorAgent", () => {
     const result = await runCursorAgent(makeOpts());
     expect(result.success).toBe(false);
     expect(result.error).toBe("max concurrency reached");
+    expect(result.projectLabel).toBe("test-project");
     expect(spawnMock).not.toHaveBeenCalled();
   });
 
@@ -126,6 +127,7 @@ describe("runCursorAgent", () => {
     expect(result.resultText).toBe("done");
     expect(result.events).toHaveLength(3);
     expect(result.usage).toEqual({ inputTokens: 100, outputTokens: 50 });
+    expect(result.projectLabel).toBe("test-project");
   });
 
   it("collects tool_call events and counts them", async () => {
@@ -313,5 +315,17 @@ describe("runCursorAgent", () => {
       expect(spawnOpts.detached).toBe(true);
       expect(proc.unref).toHaveBeenCalled();
     }
+  });
+});
+
+describe("workspaceDisplayLabel", () => {
+  it("uses the resolved directory basename as workspace name", () => {
+    expect(workspaceDisplayLabel("/opt/cursor_workspace/flp-webportal")).toBe("flp-webportal");
+    expect(workspaceDisplayLabel("/opt/cursor_workspace/flp-webportal/")).toBe("flp-webportal");
+  });
+
+  it("falls back to full resolved path when basename is empty", () => {
+    const root = workspaceDisplayLabel("/");
+    expect(root.length).toBeGreaterThan(0);
   });
 });
