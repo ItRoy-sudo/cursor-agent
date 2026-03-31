@@ -1,8 +1,18 @@
 {
   "id": "cursor-agent",
   "name": "Cursor Agent",
-  "description": "Invoke the local Cursor Agent CLI for deep code analysis, troubleshooting, and diagnostics. Supports loading project .cursor/rules, AGENTS.md, and MCP servers.",
-  "version": "0.1.0",
+  "description": "Invoke the local Cursor Agent CLI for deep code analysis, troubleshooting, and diagnostics. Supports loading project .cursor/rules, AGENTS.md, and MCP servers. Includes /cc shorthand for continuing sessions.",
+  "version": "0.2.0",
+  "commands": [
+    {
+      "name": "cursor",
+      "description": "Invoke Cursor Agent for code analysis and modification. Usage: /cursor <project> <prompt> [--mode agent|ask|plan] [--resume <sessionId>]"
+    },
+    {
+      "name": "cc",
+      "description": "Continue the previous Cursor Agent session (shorthand). Usage: /cc <your prompt>"
+    }
+  ],
   "configSchema": {
     "type": "object",
     "additionalProperties": false,

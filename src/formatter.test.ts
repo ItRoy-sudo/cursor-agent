@@ -71,7 +71,9 @@ describe("formatRunResult", () => {
     }));
     const combined = messages.join("\n");
     expect(combined).toContain("👉");
-    expect(combined).toContain("继续会话");
+    expect(combined).toContain("继续本次会话");
+    expect(combined).toContain("继续上下文会话");
+    expect(combined).toContain("/cc");
     expect(combined).toContain("/cursor flp-webportal --resume 86a7dffc-b80f-44b0-bab8-28833b2f4aad");
   });
 
@@ -82,7 +84,8 @@ describe("formatRunResult", () => {
     }));
     const combined = messages.join("\n");
     expect(combined).not.toContain("👉");
-    expect(combined).not.toContain("继续会话");
+    expect(combined).not.toContain("继续本次会话");
+    expect(combined).not.toContain("/cc");
   });
 
   it("omits resume command when sessionId is missing", () => {
@@ -92,7 +95,8 @@ describe("formatRunResult", () => {
     }));
     const combined = messages.join("\n");
     expect(combined).not.toContain("👉");
-    expect(combined).not.toContain("继续会话");
+    expect(combined).not.toContain("继续本次会话");
+    expect(combined).not.toContain("/cc");
   });
 
   it("shows tool call summary", () => {

@@ -115,7 +115,8 @@ function buildFooter(result: RunResult): string {
   // 添加快速续接命令（纯文本快捷指令）
   if (result.projectLabel && result.sessionId) {
     const resumeCmd = `/cursor ${result.projectLabel} --resume ${result.sessionId}`;
-    footer += `\n👉 **继续会话：** \`${resumeCmd}\``;
+    footer += `\n👉 **继续本次会话：** \`${resumeCmd}\``;
+    footer += `\n👉 **继续上下文会话：** 可使用 \`/cc\` 继续`;
   }
 
   return footer;
